@@ -8,13 +8,14 @@ module.exports = {
         .setDescription('Lists all available commands'),
     async execute(interaction) {
         const commandsPath = path.join(__dirname);
-        const commandFiles = fs.readdirSync(commandsPath);
+        // Get all js files from the commands directory
+        const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-        let helpMessage = 'Here are all the available commands:\n\n';
+        let helpMessage = '**Available Commands:**\n';
         for (const file of commandFiles) {
             const command = require(path.join(commandsPath, file));
-            if(command.data && command.data.name) {
-                helpMessage += `/${command.data.name}: ${command.data.description}\n`;
+            if (command.data && command.data.name && command.data.description) {
+                helpMessage += `/${command.data.name} -  ${command.data.description}\n`;
             }
         }
 
