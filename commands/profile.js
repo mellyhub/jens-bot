@@ -26,12 +26,15 @@ module.exports = {
 
             const playerData = await response.json();
 
+            // Fallback values for profiles without avatar or cover image
+            const defaultCover = 'https://cdn.statically.io/img/codetheweb.blog/assets/img/posts/css-advanced-background-images/cover.jpg?f=webp&w=720';
+
             // Create an embed with player information
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle(playerData.nickname)
                 .setURL(playerData.faceit_url.replace('{lang}', 'en'))
-                .setThumbnail(playerData.avatar)
+                .setThumbnail(playerData.avatar ? playerData : null)
                 .setDescription(`Information about **${playerData.nickname}**`)
                 .addFields(
                     { name: 'Level', value: `${playerData.games.cs2.skill_level}`, inline: true },
@@ -40,7 +43,7 @@ module.exports = {
                     { name: 'Country', value: `:flag_${playerData.country.toLowerCase()}:`, inline: true },
                     { name: 'Steam ID', value: `[${playerData.games.cs2.game_player_id}](https://steamcommunity.com/profiles/${playerData.steam_id_64})`, inline: true }
                 )
-                .setImage(playerData.cover_image)
+                .setImage(playerData.cover_image ? playerData.cover_image : defaultCover)
 
             await interaction.reply({ embeds: [embed] });
         } catch (error) {
