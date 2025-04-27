@@ -56,9 +56,76 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
-// When the client is ready, run this code (only once)
-client.once(Events.ClientReady, c => {
+async function setupMinuteTimer() {
+  try {
+    console.log("Attempting to execute automated command...");
+    
+    // 1. Get the target channel
+    const targetChannel = await client.channels.fetch("1365774869735805038");
+    if (!targetChannel) throw new Error("Channel not found");
+    console.log(`Target channel: ${targetChannel.name}`);
+
+    // 2. Create enhanced mock interaction
+    const mockInteraction = {
+      options: {
+        getString: (name) => {
+          console.log(`Getting option: ${name}`);
+          return name === 'player' ? 'Frooz1e' : null;
+        }
+      },
+      channel: targetChannel,
+      guild: targetChannel.guild,
+      user: client.user,
+      client: client,
+      createdTimestamp: Date.now(),
+      replied: false,
+      deferred: false,
+      reply: async (response) => {
+        console.log("Attempting to reply...");
+        this.replied = true;
+        if (response.embeds) {
+          return targetChannel.send({ embeds: response.embeds });
+        }
+        return targetChannel.send(response.content || 'Command executed');
+      },
+      deferReply: async () => {
+        this.deferred = true;
+        console.log("Deferring reply...");
+      },
+      isChatInputCommand: () => true,
+    };
+
+    // 3. Verify command exists
+    console.log("Checking for command...");
+    const command = client.commands.get('matchhistory');
+    if (!command) {
+      throw new Error('Command not found in collection');
+    }
+
+    // 4. Execute with error handling
+    console.log("Executing command...");
+    await command.execute(mockInteraction);
+    console.log(`Successfully executed at ${new Date().toISOString()}`);
+
+  } catch (error) {
+    console.error('Automated command failed:', error.stack); // Full error stack
+  }
+}
+
+// Enhanced ready handler
+client.once(Events.ClientReady, async c => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
+  
+  
+  /*
+  // Initial test run
+  await setupMinuteTimer();
+  
+  // Set up interval
+  setInterval(async () => {
+    await setupMinuteTimer(); 
+  }, 60000); // 60 seconds
+  */
 });
 
 // Log in to Discord with your client's token
